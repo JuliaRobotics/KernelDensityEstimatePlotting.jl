@@ -1,2 +1,2 @@
-# KernelDenstiyEstimatePlotting.jl
+# KernelDensityEstimatePlotting.jl
 Plotting functions for the KernelDensityEstimate.jl package
