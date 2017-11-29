@@ -15,3 +15,7 @@ This package will be registered in the future, but until then please install wit
 ```julia
 Pkg.clone("https://github.com/dehann/KernelDensityEstimatePlotting.jl")
 ```
+
+# Usage
+
+Please see examples on [KernelDensityEstimate.jl](https://github.com/dehann/KernelDensityEstimate.jl).
