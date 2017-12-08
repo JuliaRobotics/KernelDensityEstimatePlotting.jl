@@ -4,12 +4,14 @@ using KernelDensityEstimate
 using Gadfly, Colors, Cairo, Fontconfig, Compose
 
 import Gadfly: plot
+# KDE imports will be remove when plotting is permanently removed from the KDE package
+# import KernelDensityEstimate: plotKDE,plotKDEContour,drawAllPairs,stackMarginals,vstackedPlots,drawHorDens,toggleYTicks
 
 export
   # Gadfly plotting functions
   plot,
-  plotKDE,
   plotKDEContour,
+  plotKDE,
   drawPair,
   drawAllPairs,
   stackMarginals,
@@ -18,7 +20,6 @@ export
   toggleYTicks,
   DOYTICKS
 
-VectorRange{T} = Union{Vector{T},UnitRange{T}}
 VoidUnion{T}   = Union{Void, T}
 
 # Guide.manual_color_key("Legend", ["Points", "Line"], ["green", "deepskyblue"])
@@ -32,9 +33,27 @@ function toggleYTicks()
   return DOYTICKS
 end
 
-function plot(p::BallTreeDensity)
-   plotKDE(p)
+# function plot(p::BallTreeDensity)
+#    plotKDE(p)
+# end
+
+function plot(darr::Union{BallTreeDensity, Vector{BallTreeDensity}};
+      c::VoidUnion{Vector{T}}=nothing,
+      N::Int=200,
+      rmax=-Inf,rmin=Inf,  # should be deprecated
+      axis::VoidUnion{Array{Float64,2}}=nothing,
+      dims::VoidUnion{VectorRange{Int}}=nothing,
+      xlbl::T="X", # to be deprecated
+      title::VoidUnion{T}=nothing,
+      legend::VoidUnion{Vector{T}}=nothing,
+      dimLbls::VoidUnion{Vector{T}}=nothing,
+      levels::VoidUnion{Int}=nothing,
+      fill=false ) where {T <: AbstractString}
+  #
+  plotKDE(darr, c=c, N=N, rmin=rmin, rmax=rmax, axis=axis, dims=dims, xlbl=xlbl, title=title, legend=legend, dimLbls=dimLbls, levels=levels, fill=fill )
 end
+
+
 
 function draw1D!{T <: AbstractString}(bd::BallTreeDensity,
       bins::AbstractArray{Float64,1},
@@ -257,7 +276,7 @@ end
 
 # function to draw all pairs of mulitdimensional kernel density estimate
 # axis is matrix with rows as dimensions and two columns for min and max axis cutoffs
-function plotKDE{T <: AbstractString}(darr::Array{BallTreeDensity,1};
+function plotKDE(darr::Array{BallTreeDensity,1};
       c::VoidUnion{Vector{T}}=nothing,
       N::Int=200,
       rmax=-Inf,rmin=Inf,  # should be deprecated
@@ -268,7 +287,7 @@ function plotKDE{T <: AbstractString}(darr::Array{BallTreeDensity,1};
       legend::VoidUnion{Vector{T}}=nothing,
       dimLbls::VoidUnion{Vector{T}}=nothing,
       levels::VoidUnion{Int}=nothing,
-      fill=false )
+      fill=false ) where {T <: AbstractString}
 
 
     # defaults
