@@ -18,11 +18,13 @@ export
   toggleYTicks,
   DOYTICKS
 
+VectorRange{T} = Union{Vector{T},UnitRange{T}}
+VoidUnion{T}   = Union{Void, T}
+
 # Guide.manual_color_key("Legend", ["Points", "Line"], ["green", "deepskyblue"])
 
 DOYTICKS=true
 
-VoidUnion{T}   = Union{Void, T}
 
 function toggleYTicks()
   global DOYTICKS
