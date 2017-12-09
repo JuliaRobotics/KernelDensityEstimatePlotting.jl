@@ -55,7 +55,7 @@ end
 
 
 
-function draw1D!{T <: AbstractString}(bd::BallTreeDensity,
+function draw1D!(bd::BallTreeDensity,
       bins::AbstractArray{Float64,1},
       e,
       c::T="deepskyblue",
@@ -63,7 +63,7 @@ function draw1D!{T <: AbstractString}(bd::BallTreeDensity,
       xlbl="X",
       legend=nothing,
       title::VoidUnion{T}=nothing,
-      fill=false )
+      fill=false ) where {T <: AbstractString}
   #
   global DOYTICKS
 
@@ -101,7 +101,7 @@ function draw1D!{T <: AbstractString}(bd::BallTreeDensity,
 end
 
 
-function plotKDEContour{T <: AbstractString}(pp::Vector{BallTreeDensity};
+function plotKDEContour(pp::Vector{BallTreeDensity};
     xmin=-Inf,xmax=Inf,ymin=-Inf,ymax=Inf,
     xlbl::T="x", ylbl::T="y",
     N::Int=200,
@@ -109,7 +109,7 @@ function plotKDEContour{T <: AbstractString}(pp::Vector{BallTreeDensity};
     legend=nothing,
     title::VoidUnion{T}=nothing,
     levels::VoidUnion{Int}=nothing,
-    fill=false )
+    fill=false ) where {T <: AbstractString}
 
   rangeV = getKDERange(pp[1])
   size(rangeV,1) == 2 ? nothing : error("plotKDEContour must receive two dimensional kde, you gave $(Ndim(x))")
@@ -168,7 +168,7 @@ end
 #        Scale.color_none)
 
 
-function plotKDEContour{T <: AbstractString}(p::BallTreeDensity;
+function plotKDEContour(p::BallTreeDensity;
     xmin=-Inf,xmax=Inf,ymin=-Inf,ymax=Inf,
     xlbl::T="x", ylbl::T="y",
     N::Int=200,
@@ -176,7 +176,7 @@ function plotKDEContour{T <: AbstractString}(p::BallTreeDensity;
     legend=nothing,
     title::VoidUnion{T}=nothing,
     levels::VoidUnion{Int}=nothing,
-    fill=false )
+    fill=false ) where {T <: AbstractString}
 
     plotKDEContour([p],
       xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,
@@ -189,14 +189,14 @@ function plotKDEContour{T <: AbstractString}(p::BallTreeDensity;
       fill=fill )
 end
 
-function drawPair{T <: AbstractString}(xx::Vector{BallTreeDensity}, dims::Vector{Int};
+function drawPair(xx::Vector{BallTreeDensity}, dims::Vector{Int};
     axis::VoidUnion{Array{Float64,2}}=nothing,
     dimLbls::VoidUnion{Vector{T}}=nothing,
     legend=nothing,
     title::VoidUnion{T}=nothing,
     levels::VoidUnion{Int}=nothing,
     c::VoidUnion{Vector{T}}=nothing,
-    fill=false )
+    fill=false ) where {T <: AbstractString}
   # pts = getPoints(x);
   xmin, xmax, ymin, ymax = -Inf,Inf,-Inf,Inf
   if axis != nothing
@@ -220,13 +220,13 @@ function drawPair{T <: AbstractString}(xx::Vector{BallTreeDensity}, dims::Vector
     levels=levels,c=c, fill=fill  )
 end
 
-function stacking(spp::Vector{Compose.Context})
+function stacking(spp::Vector{<:Compose.Context})
   hstack(spp...)
 end
 
 # function to draw all pairs of mulitdimensional kernel density estimate
 # axis is matrix with rows as dimensions and two columns for min and max axis cutoffs
-function drawAllPairs{T <: AbstractString}(xx::Vector{BallTreeDensity};
+function drawAllPairs(xx::Vector{BallTreeDensity};
       dims::VoidUnion{VectorRange{Int}}=nothing,
       axis::VoidUnion{Array{Float64,2}}=nothing,
       dimLbls::VoidUnion{Vector{T}}=nothing,
@@ -234,7 +234,7 @@ function drawAllPairs{T <: AbstractString}(xx::Vector{BallTreeDensity};
       title::VoidUnion{T}=nothing,
       levels::VoidUnion{Int}=nothing,
       c::VoidUnion{Vector{T}}=nothing,
-      fill=false )
+      fill=false ) where {T <: AbstractString}
 
   # pts = getPoints(xx[1]);
   # e = [];
@@ -331,7 +331,7 @@ function plotKDE(darr::Array{BallTreeDensity,1};
 end
 
 
-function plotKDE{T <: AbstractString}(bd::BallTreeDensity;
+function plotKDE(bd::BallTreeDensity;
       c::VoidUnion{Vector{T}}=nothing,
       N::Int=200,
       rmax=-Inf,rmin=Inf,  # should be deprecated
@@ -342,7 +342,7 @@ function plotKDE{T <: AbstractString}(bd::BallTreeDensity;
       title::VoidUnion{T}=nothing,
       dimLbls::VoidUnion{Vector{T}}=nothing,
       levels::VoidUnion{Int}=nothing,
-      fill=false )
+      fill=false ) where {T <: AbstractString}
 
   plotKDE([bd],N=N,c=c,rmax=rmax,rmin=rmin,xlbl=xlbl,legend=legend, dims=dims, axis=axis, dimLbls=dimLbls, levels=levels, title=title, fill=fill)
 end
@@ -387,7 +387,7 @@ function stackMarginals(P::Array{BallTreeDensity,1}, m::Int64)
 end
 
 
-function vstackedPlots(plots::Array{Gadfly.Compose.Context,1})
+function vstackedPlots(plots::Vector{<: Gadfly.Compose.Context})
     evalstr = ""
     for i in 1:length(plots)
         evalstr = string(evalstr, ",plots[$(i)]")
