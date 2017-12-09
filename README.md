@@ -18,4 +18,16 @@ Pkg.clone("https://github.com/dehann/KernelDensityEstimatePlotting.jl")
 
 # Usage
 
+## Basic Examples
+
+```julia
+using KernelDensityEstimate, KernelDensityEstimatePlotting
+
+p = kde!(randn(3,100))
+plot(marginal(p, [1]))
+plot(marginal(p, [2,3]))
+plot(p)
+```
+## More Examples
+
 Please see examples on [KernelDensityEstimate.jl](https://github.com/dehann/KernelDensityEstimate.jl).
