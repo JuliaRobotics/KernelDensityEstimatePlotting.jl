@@ -1,11 +1,12 @@
 # KernelDensityEstimatePlotting.jl
 
-[![Build Status](https://travis-ci.org/dehann/KernelDensityEstimatePlotting.jl.svg?branch=master)](https://travis-ci.org/dehann/KernelDensityEstimatePlotting.jl)
-[![codecov.io](https://codecov.io/github/dehann/KernelDensityEstimatePlotting.jl/coverage.svg?branch=master)](https://codecov.io/github/dehann/KernelDensityEstimatePlotting.jl?branch=master)
+[![Build Status](https://travis-ci.org/JuliaRobotics/KernelDensityEstimatePlotting.jl.svg?branch=master)](https://travis-ci.org/JuliaRobotics/KernelDensityEstimatePlotting.jl)
+[![codecov.io](https://codecov.io/github/JuliaRobotics/KernelDensityEstimatePlotting.jl/coverage.svg?branch=master)](https://codecov.io/github/JuliaRobotics/KernelDensityEstimatePlotting.jl?branch=master)
 
 [![KernelDensityEstimatePlotting](http://pkg.julialang.org/badges/KernelDensityEstimatePlotting_0.6.svg)](http://pkg.julialang.org/?pkg=KernelDensityEstimatePlotting&ver=0.6)
+[![KernelDensityEstimatePlotting](http://pkg.julialang.org/badges/KernelDensityEstimatePlotting_0.7.svg)](http://pkg.julialang.org/?pkg=KernelDensityEstimatePlotting&ver=0.7)
 
-This package provides the plotting functionality for the [KernelDensityEstimate.jl](https://github.com/dehann/KernelDensityEstimate.jl) package, and currently only supports the Gadfly back-end.
+This package provides the plotting functionality for the [KernelDensityEstimate.jl](https://github.com/JuliaRobotics/KernelDensityEstimate.jl) package, and currently only supports the Gadfly back-end.
 
 This package is also used extensively by the [RoMEPlotting.jl](https://github.com/dehann/RoMEPlotting.jl) package.
 
@@ -13,7 +14,7 @@ This package is also used extensively by the [RoMEPlotting.jl](https://github.co
 
 This package will be registered in the future, but until then please install with:
 ```julia
-Pkg.clone("https://github.com/dehann/KernelDensityEstimatePlotting.jl")
+Pkg.clone("https://github.com/JuliaRobotics/KernelDensityEstimatePlotting.jl")
 ```
 
 # Usage
@@ -30,4 +31,4 @@ plot(p)
 ```
 ## More Examples
 
-Please see examples on [KernelDensityEstimate.jl](https://github.com/dehann/KernelDensityEstimate.jl).
+Please see examples on [KernelDensityEstimate.jl](https://github.com/JuliaRobotics/KernelDensityEstimate.jl).
