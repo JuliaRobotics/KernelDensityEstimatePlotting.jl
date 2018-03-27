@@ -12,10 +12,11 @@ This package is also used extensively by the [RoMEPlotting.jl](https://github.co
 
 # Install
 
-This package will be registered in the future, but until then please install with:
+This package can be installed with:
 ```julia
-Pkg.clone("https://github.com/JuliaRobotics/KernelDensityEstimatePlotting.jl")
+Pkg.add("KernelDensityEstimatePlotting")
 ```
+
 
 # Usage
 
