@@ -48,9 +48,9 @@ function plot(darr::Union{BallTreeDensity, Vector{BallTreeDensity}};
       legend::VoidUnion{Vector{T}}=nothing,
       dimLbls::VoidUnion{Vector{T}}=nothing,
       levels::VoidUnion{Int}=nothing,
-      fill=false ) where {T <: AbstractString}
+      fill=false, layers::Bool=false ) where {T <: AbstractString}
   #
-  plotKDE(darr, c=c, N=N, rmin=rmin, rmax=rmax, axis=axis, dims=dims, xlbl=xlbl, title=title, legend=legend, dimLbls=dimLbls, levels=levels, fill=fill )
+  plotKDE(darr, c=c, N=N, rmin=rmin, rmax=rmax, axis=axis, dims=dims, xlbl=xlbl, title=title, legend=legend, dimLbls=dimLbls, levels=levels, fill=fill, layers=layers )
 end
 
 
@@ -63,7 +63,7 @@ function draw1D!(bd::BallTreeDensity,
       xlbl="X",
       legend=nothing,
       title::VoidUnion{T}=nothing,
-      fill=false ) where {T <: AbstractString}
+      fill=false, layers::Bool=false ) where {T <: AbstractString}
   #
   global DOYTICKS
 
@@ -90,7 +90,7 @@ function draw1D!(bd::BallTreeDensity,
       push!(ptArr, Guide.title(title))
     end
 
-    e = Gadfly.plot(ptArr...)
+    e = !layers ? Gadfly.plot(ptArr...) : ptArr
   else
     push!(e.layers, layer(x=bins, y=yV, Geom.line, Gadfly.Theme(default_color=parse(Colorant,c),line_width=2pt))[1])
   end
@@ -109,7 +109,7 @@ function plotKDEContour(pp::Vector{BallTreeDensity};
     legend=nothing,
     title::VoidUnion{T}=nothing,
     levels::VoidUnion{Int}=nothing,
-    fill=false ) where {T <: AbstractString}
+    fill=false, layers::Bool=false ) where {T <: AbstractString}
 
   rangeV = getKDERange(pp[1])
   size(rangeV,1) == 2 ? nothing : error("plotKDEContour must receive two dimensional kde, you gave $(Ndim(x))")
@@ -159,14 +159,16 @@ function plotKDEContour(pp::Vector{BallTreeDensity};
   if title != nothing
     push!(PL, Guide.title(title))
   end
-
-  Gadfly.plot(PL...)
+  if !layers
+    return Gadfly.plot(PL...)
+  else
+    return PL
+  end
 end
 # p1 = plot(
 #        layer(z=ff,x=linspace(-5,5,100),y=linspace(-5,5,100), Geom.contour(levels=5),Theme(default_color=parse(Colorant,"blue"))),
 #        layer(z=ff2,x=linspace(-5,5,100),y=linspace(-5,5,100), Geom.contour(levels=5),Theme(default_color=parse(Colorant,"red"))),
 #        Scale.color_none)
-
 
 function plotKDEContour(p::BallTreeDensity;
     xmin=-Inf,xmax=Inf,ymin=-Inf,ymax=Inf,
@@ -176,7 +178,7 @@ function plotKDEContour(p::BallTreeDensity;
     legend=nothing,
     title::VoidUnion{T}=nothing,
     levels::VoidUnion{Int}=nothing,
-    fill=false ) where {T <: AbstractString}
+    fill=false, layers::Bool=false ) where {T <: AbstractString}
 
     plotKDEContour([p],
       xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,
@@ -186,7 +188,7 @@ function plotKDEContour(p::BallTreeDensity;
       legend=legend,
       title=title,
       levels=levels,
-      fill=fill )
+      fill=fill, layers=layers )
 end
 
 function drawPair(xx::Vector{BallTreeDensity}, dims::Vector{Int};
@@ -196,7 +198,7 @@ function drawPair(xx::Vector{BallTreeDensity}, dims::Vector{Int};
     title::VoidUnion{T}=nothing,
     levels::VoidUnion{Int}=nothing,
     c::VoidUnion{Vector{T}}=nothing,
-    fill=false ) where {T <: AbstractString}
+    fill=false, layers::Bool=false ) where {T <: AbstractString}
   # pts = getPoints(x);
   xmin, xmax, ymin, ymax = -Inf,Inf,-Inf,Inf
   if axis != nothing
@@ -217,7 +219,7 @@ function drawPair(xx::Vector{BallTreeDensity}, dims::Vector{Int};
     xlbl=xlbl,ylbl=ylbl,
     legend=legend,
     title=title,
-    levels=levels,c=c, fill=fill  )
+    levels=levels,c=c, fill=fill, layers=layers  )
 end
 
 function stacking(spp::Vector{<:Compose.Context})
@@ -234,7 +236,7 @@ function drawAllPairs(xx::Vector{BallTreeDensity};
       title::VoidUnion{T}=nothing,
       levels::VoidUnion{Int}=nothing,
       c::VoidUnion{Vector{T}}=nothing,
-      fill=false ) where {T <: AbstractString}
+      fill=false, layers::Bool=false ) where {T <: AbstractString}
 
   # pts = getPoints(xx[1]);
   # e = [];
@@ -248,7 +250,12 @@ function drawAllPairs(xx::Vector{BallTreeDensity};
 
   subplots = Array{Gadfly.Plot,2}(Nrow,Ncol)
   for iT=1:length(PlotI2)
-    subplots[iT] = drawPair(xx,[PlotI1[iT];PlotI2[iT]], axis=axis, dimLbls=dimLbls, legend=legend, title=title, levels=levels, c=c, fill=fill);
+    # only returns layers for first pair
+    if !layers
+      subplots[iT] = drawPair(xx,[PlotI1[iT];PlotI2[iT]], axis=axis, dimLbls=dimLbls, legend=legend, title=title, levels=levels, c=c, fill=fill, layers=layers);
+    else
+      return drawPair(xx,[PlotI1[iT];PlotI2[iT]], axis=axis, dimLbls=dimLbls, legend=legend, title=title, levels=levels, c=c, fill=fill, layers=layers)
+    end
   end;
 
   Nrow==1 && Ncol==1 ? nothing : println("Multiple planes stacked into Compose.Context, use Gadfly.draw(PNG(file.png,10cm,10cm),plothdl). Or PDF.")
@@ -287,7 +294,8 @@ function plotKDE(darr::Array{BallTreeDensity,1};
       legend::VoidUnion{Vector{T}}=nothing,
       dimLbls::VoidUnion{Vector{T}}=nothing,
       levels::VoidUnion{Int}=nothing,
-      fill=false ) where {T <: AbstractString}
+      fill=false,
+      layers::Bool=false ) where {T <: AbstractString}
 
 
     # defaults
@@ -325,7 +333,7 @@ function plotKDE(darr::Array{BallTreeDensity,1};
       end
     else
       color = defaultcolor ? nothing : c
-      H = drawAllPairs(darr, axis=axis, dims=dim, dimLbls=dimLbls, legend=lg, title=title, levels=levels, c=color, fill=fill)
+      H = drawAllPairs(darr, axis=axis, dims=dim, dimLbls=dimLbls, legend=lg, title=title, levels=levels, c=color, fill=fill, layers=layers)
     end
     return H
 end
@@ -342,9 +350,9 @@ function plotKDE(bd::BallTreeDensity;
       title::VoidUnion{T}=nothing,
       dimLbls::VoidUnion{Vector{T}}=nothing,
       levels::VoidUnion{Int}=nothing,
-      fill=false ) where {T <: AbstractString}
+      fill=false, layers::Bool=false ) where {T <: AbstractString}
 
-  plotKDE([bd],N=N,c=c,rmax=rmax,rmin=rmin,xlbl=xlbl,legend=legend, dims=dims, axis=axis, dimLbls=dimLbls, levels=levels, title=title, fill=fill)
+  plotKDE([bd],N=N,c=c,rmax=rmax,rmin=rmin,xlbl=xlbl,legend=legend, dims=dims, axis=axis, dimLbls=dimLbls, levels=levels, title=title, fill=fill, layers=layers)
 end
 
 
