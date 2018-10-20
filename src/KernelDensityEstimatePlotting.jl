@@ -1,5 +1,6 @@
 module KernelDensityEstimatePlotting
 
+using LinearAlgebra, Statistics
 using KernelDensityEstimate
 using Gadfly, Colors, Cairo, Fontconfig, Compose
 
@@ -69,7 +70,7 @@ function draw1D!(bd::BallTreeDensity,
 
   yV = evaluateDualTree(bd,bins)
   # clamp max y values
-  yV[3.0 .< yV] = 3.0
+  yV[3.0 .< yV] .= 3.0
   if e == nothing
     ptArr = Any[]
 
@@ -242,13 +243,14 @@ function drawAllPairs(xx::Vector{BallTreeDensity};
   # e = [];
   dims = dims != nothing ? collect(dims) : collect(1:Ndim(xx[1]))
   Nout = length(dims);
-  PlotI2 = triu(repmat( (dims)' ,Nout, 1), 1);
-  PlotI1 = triu(repmat((dims)' , Nout, 1)', 1);
-  PlotI1, PlotI2 = PlotI1[find(PlotI1)],  PlotI2[find(PlotI2)];
+  PlotI2 = triu(repeat( (dims)' ,Nout, 1), 1);
+  PlotI1 = triu(repeat((dims)' , Nout, 1)', 1);
+  PlotI1, PlotI2 = PlotI1[(LinearIndices(PlotI1))[findall(x->x!=0,PlotI1)]],  PlotI2[(LinearIndices(PlotI2))[findall(x->x!=0,PlotI2)]];
+  # PlotI1, PlotI2 = PlotI1[find(PlotI1)],  PlotI2[find(PlotI2)];
   Ncol = round(Int, sqrt(length(PlotI2)));
   Nrow = ceil(Int, length(PlotI2)/Ncol);
 
-  subplots = Array{Gadfly.Plot,2}(Nrow,Ncol)
+  subplots = Array{Gadfly.Plot,2}(undef, Nrow,Ncol)
   for iT=1:length(PlotI2)
     # only returns layers for first pair
     if !layers
@@ -259,7 +261,7 @@ function drawAllPairs(xx::Vector{BallTreeDensity};
   end;
 
   Nrow==1 && Ncol==1 ? nothing : println("Multiple planes stacked into Compose.Context, use Gadfly.draw(PNG(file.png,10cm,10cm),plothdl). Or PDF.")
-  hh = Vector{Gadfly.Context}(Nrow)
+  hh = Vector{Gadfly.Context}(undef, Nrow)
   for i in 1:Nrow
     sp = Compose.Context[]
     for j in 1:Ncol
@@ -303,7 +305,7 @@ function plotKDE(darr::Array{BallTreeDensity,1};
     if c==nothing
       c, defaultcolor = ["black"], true
     end
-    c = (length(c)>=2) ? c : repmat(c,length(darr))
+    c = (length(c)>=2) ? c : repeat(c,length(darr))
     lg = (legend == nothing) ? nothing : Guide.manual_color_key("Legend", legend, c)
 
     H = nothing
