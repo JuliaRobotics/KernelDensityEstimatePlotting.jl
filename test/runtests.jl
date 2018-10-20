@@ -1,5 +1,6 @@
-using Base: Test
-using KernelDensityEstimate, KernelDensityEstimatePlotting
+using Test
+using KernelDensityEstimate
+using KernelDensityEstimatePlotting
 using Colors
 
 # check for errors on plotting code
