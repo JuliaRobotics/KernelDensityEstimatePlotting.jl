@@ -15,6 +15,6 @@ matrix:
     - julia: nightly
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --check-bounds=yes -e 'using Pkg; Pkg.clone(pwd()); Pkg.test("KernelDensityEstimate"; coverage=true)'
+  - julia --check-bounds=yes -e 'using Pkg; Pkg.clone(pwd()); Pkg.test("KernelDensityEstimatePlotting"; coverage=true)'
 after_success:
-  - julia -e 'using Pkg; cd(Pkg.dir("KernelDensityEstimate")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+  - julia -e 'using Pkg; cd(Pkg.dir("KernelDensityEstimatePlotting")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
