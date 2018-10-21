@@ -1,5 +1,6 @@
 module KernelDensityEstimatePlotting
 
+using LinearAlgebra, Statistics
 using KernelDensityEstimate
 using Gadfly, Colors, Cairo, Fontconfig, Compose
 
@@ -20,7 +21,7 @@ export
   toggleYTicks,
   DOYTICKS
 
-VoidUnion{T}   = Union{Void, T}
+NothingUnion{T}   = Union{Nothing, T}
 
 # Guide.manual_color_key("Legend", ["Points", "Line"], ["green", "deepskyblue"])
 
@@ -38,16 +39,16 @@ end
 # end
 
 function plot(darr::Union{BallTreeDensity, Vector{BallTreeDensity}};
-      c::VoidUnion{Vector{T}}=nothing,
+      c::NothingUnion{Vector{T}}=nothing,
       N::Int=200,
       rmax=-Inf,rmin=Inf,  # should be deprecated
-      axis::VoidUnion{Array{Float64,2}}=nothing,
-      dims::VoidUnion{VectorRange{Int}}=nothing,
+      axis::NothingUnion{Array{Float64,2}}=nothing,
+      dims::NothingUnion{VectorRange{Int}}=nothing,
       xlbl::T="X", # to be deprecated
-      title::VoidUnion{T}=nothing,
-      legend::VoidUnion{Vector{T}}=nothing,
-      dimLbls::VoidUnion{Vector{T}}=nothing,
-      levels::VoidUnion{Int}=nothing,
+      title::NothingUnion{T}=nothing,
+      legend::NothingUnion{Vector{T}}=nothing,
+      dimLbls::NothingUnion{Vector{T}}=nothing,
+      levels::NothingUnion{Int}=nothing,
       fill=false, layers::Bool=false ) where {T <: AbstractString}
   #
   plotKDE(darr, c=c, N=N, rmin=rmin, rmax=rmax, axis=axis, dims=dims, xlbl=xlbl, title=title, legend=legend, dimLbls=dimLbls, levels=levels, fill=fill, layers=layers )
@@ -62,14 +63,14 @@ function draw1D!(bd::BallTreeDensity,
       myStyle::T="";
       xlbl="X",
       legend=nothing,
-      title::VoidUnion{T}=nothing,
+      title::NothingUnion{T}=nothing,
       fill=false, layers::Bool=false ) where {T <: AbstractString}
   #
   global DOYTICKS
 
   yV = evaluateDualTree(bd,bins)
   # clamp max y values
-  yV[3.0 .< yV] = 3.0
+  yV[3.0 .< yV] .= 3.0
   if e == nothing
     ptArr = Any[]
 
@@ -105,10 +106,10 @@ function plotKDEContour(pp::Vector{BallTreeDensity};
     xmin=-Inf,xmax=Inf,ymin=-Inf,ymax=Inf,
     xlbl::T="x", ylbl::T="y",
     N::Int=200,
-    c::VoidUnion{Vector{T}}=nothing,
+    c::NothingUnion{Vector{T}}=nothing,
     legend=nothing,
-    title::VoidUnion{T}=nothing,
-    levels::VoidUnion{Int}=nothing,
+    title::NothingUnion{T}=nothing,
+    levels::NothingUnion{Int}=nothing,
     fill=false, layers::Bool=false ) where {T <: AbstractString}
 
   rangeV = getKDERange(pp[1])
@@ -140,8 +141,8 @@ function plotKDEContour(pp::Vector{BallTreeDensity};
   for p in pp
     i+=1
     push!(PL, layer(z=(x,y)->evaluateDualTree(p,([[x]';[y]']))[1],
-    x=linspace(xmin,xmax,N),
-    y=linspace(ymin,ymax,N),
+    x=range(xmin,stop=xmax,length=N),
+    y=range(ymin,stop=ymax,length=N),
     CO,
     Theme(default_color=parse(Colorant,c[i])))[1] )
   end
@@ -174,10 +175,10 @@ function plotKDEContour(p::BallTreeDensity;
     xmin=-Inf,xmax=Inf,ymin=-Inf,ymax=Inf,
     xlbl::T="x", ylbl::T="y",
     N::Int=200,
-    c::VoidUnion{Vector{T}}=nothing,
+    c::NothingUnion{Vector{T}}=nothing,
     legend=nothing,
-    title::VoidUnion{T}=nothing,
-    levels::VoidUnion{Int}=nothing,
+    title::NothingUnion{T}=nothing,
+    levels::NothingUnion{Int}=nothing,
     fill=false, layers::Bool=false ) where {T <: AbstractString}
 
     plotKDEContour([p],
@@ -192,12 +193,12 @@ function plotKDEContour(p::BallTreeDensity;
 end
 
 function drawPair(xx::Vector{BallTreeDensity}, dims::Vector{Int};
-    axis::VoidUnion{Array{Float64,2}}=nothing,
-    dimLbls::VoidUnion{Vector{T}}=nothing,
+    axis::NothingUnion{Array{Float64,2}}=nothing,
+    dimLbls::NothingUnion{Vector{T}}=nothing,
     legend=nothing,
-    title::VoidUnion{T}=nothing,
-    levels::VoidUnion{Int}=nothing,
-    c::VoidUnion{Vector{T}}=nothing,
+    title::NothingUnion{T}=nothing,
+    levels::NothingUnion{Int}=nothing,
+    c::NothingUnion{Vector{T}}=nothing,
     fill=false, layers::Bool=false ) where {T <: AbstractString}
   # pts = getPoints(x);
   xmin, xmax, ymin, ymax = -Inf,Inf,-Inf,Inf
@@ -229,26 +230,27 @@ end
 # function to draw all pairs of mulitdimensional kernel density estimate
 # axis is matrix with rows as dimensions and two columns for min and max axis cutoffs
 function drawAllPairs(xx::Vector{BallTreeDensity};
-      dims::VoidUnion{VectorRange{Int}}=nothing,
-      axis::VoidUnion{Array{Float64,2}}=nothing,
-      dimLbls::VoidUnion{Vector{T}}=nothing,
+      dims::NothingUnion{VectorRange{Int}}=nothing,
+      axis::NothingUnion{Array{Float64,2}}=nothing,
+      dimLbls::NothingUnion{Vector{T}}=nothing,
       legend=nothing,
-      title::VoidUnion{T}=nothing,
-      levels::VoidUnion{Int}=nothing,
-      c::VoidUnion{Vector{T}}=nothing,
+      title::NothingUnion{T}=nothing,
+      levels::NothingUnion{Int}=nothing,
+      c::NothingUnion{Vector{T}}=nothing,
       fill=false, layers::Bool=false ) where {T <: AbstractString}
 
   # pts = getPoints(xx[1]);
   # e = [];
   dims = dims != nothing ? collect(dims) : collect(1:Ndim(xx[1]))
   Nout = length(dims);
-  PlotI2 = triu(repmat( (dims)' ,Nout, 1), 1);
-  PlotI1 = triu(repmat((dims)' , Nout, 1)', 1);
-  PlotI1, PlotI2 = PlotI1[find(PlotI1)],  PlotI2[find(PlotI2)];
+  PlotI2 = triu(repeat( (dims)' ,Nout, 1), 1);
+  PlotI1 = triu(repeat((dims)' , Nout, 1)', 1);
+  PlotI1, PlotI2 = PlotI1[(LinearIndices(PlotI1))[findall(x->x!=0,PlotI1)]],  PlotI2[(LinearIndices(PlotI2))[findall(x->x!=0,PlotI2)]];
+  # PlotI1, PlotI2 = PlotI1[find(PlotI1)],  PlotI2[find(PlotI2)];
   Ncol = round(Int, sqrt(length(PlotI2)));
   Nrow = ceil(Int, length(PlotI2)/Ncol);
 
-  subplots = Array{Gadfly.Plot,2}(Nrow,Ncol)
+  subplots = Array{Gadfly.Plot,2}(undef, Nrow,Ncol)
   for iT=1:length(PlotI2)
     # only returns layers for first pair
     if !layers
@@ -259,7 +261,7 @@ function drawAllPairs(xx::Vector{BallTreeDensity};
   end;
 
   Nrow==1 && Ncol==1 ? nothing : println("Multiple planes stacked into Compose.Context, use Gadfly.draw(PNG(file.png,10cm,10cm),plothdl). Or PDF.")
-  hh = Vector{Gadfly.Context}(Nrow)
+  hh = Vector{Gadfly.Context}(undef, Nrow)
   for i in 1:Nrow
     sp = Compose.Context[]
     for j in 1:Ncol
@@ -284,16 +286,16 @@ end
 # function to draw all pairs of mulitdimensional kernel density estimate
 # axis is matrix with rows as dimensions and two columns for min and max axis cutoffs
 function plotKDE(darr::Array{BallTreeDensity,1};
-      c::VoidUnion{Vector{T}}=nothing,
+      c::NothingUnion{Vector{T}}=nothing,
       N::Int=200,
       rmax=-Inf,rmin=Inf,  # should be deprecated
-      axis::VoidUnion{Array{Float64,2}}=nothing,
-      dims::VoidUnion{VectorRange{Int}}=nothing,
+      axis::NothingUnion{Array{Float64,2}}=nothing,
+      dims::NothingUnion{VectorRange{Int}}=nothing,
       xlbl::T="X", # to be deprecated
-      title::VoidUnion{T}=nothing,
-      legend::VoidUnion{Vector{T}}=nothing,
-      dimLbls::VoidUnion{Vector{T}}=nothing,
-      levels::VoidUnion{Int}=nothing,
+      title::NothingUnion{T}=nothing,
+      legend::NothingUnion{Vector{T}}=nothing,
+      dimLbls::NothingUnion{Vector{T}}=nothing,
+      levels::NothingUnion{Int}=nothing,
       fill=false,
       layers::Bool=false ) where {T <: AbstractString}
 
@@ -303,7 +305,7 @@ function plotKDE(darr::Array{BallTreeDensity,1};
     if c==nothing
       c, defaultcolor = ["black"], true
     end
-    c = (length(c)>=2) ? c : repmat(c,length(darr))
+    c = (length(c)>=2) ? c : repeat(c,length(darr))
     lg = (legend == nothing) ? nothing : Guide.manual_color_key("Legend", legend, c)
 
     H = nothing
@@ -326,7 +328,7 @@ function plotKDE(darr::Array{BallTreeDensity,1};
               if rangeV[1] > axis[di,1]  rangeV[1] = axis[di,1] end
               if axis[di,2] > rangeV[2]  rangeV[2] = axis[di,2] end
             end
-            H=draw1D!(mbd,linspace(rangeV[1],rangeV[2],N), H, c[i],xlbl=xlbl,legend=lg, title=title, fill=fill) #,argsPlot,argsKDE
+            H=draw1D!(mbd,range(rangeV[1],stop=rangeV[2],length=N), H, c[i],xlbl=xlbl,legend=lg, title=title, fill=fill) #,argsPlot,argsKDE
           else
             #
           end
@@ -340,16 +342,16 @@ end
 
 
 function plotKDE(bd::BallTreeDensity;
-      c::VoidUnion{Vector{T}}=nothing,
+      c::NothingUnion{Vector{T}}=nothing,
       N::Int=200,
       rmax=-Inf,rmin=Inf,  # should be deprecated
-      axis::VoidUnion{Array{Float64,2}}=nothing,
-      dims::VoidUnion{VectorRange{Int}}=nothing,
+      axis::NothingUnion{Array{Float64,2}}=nothing,
+      dims::NothingUnion{VectorRange{Int}}=nothing,
       xlbl::T="X",
-      legend::VoidUnion{Vector{T}}=nothing,
-      title::VoidUnion{T}=nothing,
-      dimLbls::VoidUnion{Vector{T}}=nothing,
-      levels::VoidUnion{Int}=nothing,
+      legend::NothingUnion{Vector{T}}=nothing,
+      title::NothingUnion{T}=nothing,
+      dimLbls::NothingUnion{Vector{T}}=nothing,
+      levels::NothingUnion{Int}=nothing,
       fill=false, layers::Bool=false ) where {T <: AbstractString}
 
   plotKDE([bd],N=N,c=c,rmax=rmax,rmin=rmin,xlbl=xlbl,legend=legend, dims=dims, axis=axis, dimLbls=dimLbls, levels=levels, title=title, fill=fill, layers=layers)
