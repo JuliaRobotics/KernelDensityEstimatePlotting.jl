@@ -1,6 +1,6 @@
 julia 0.7
 Cairo 0.5.5
-Fontconfig
+Fontconfig 0.2.0
 Gadfly 1.0.0
 Colors 0.9.4
 Compose 0.7.1
