@@ -11,6 +11,7 @@ import Gadfly: plot
 export
   # Gadfly plotting functions
   plot,
+  getColorsByLength, # duplicated in RoMEPlotting
   plotKDEContour,
   plotKDE,
   drawPair,
@@ -283,29 +284,46 @@ function drawAllPairs(xx::Vector{BallTreeDensity};
   return Nrow==1 && Ncol==1 ? subplots[1,1] : vstack(hh...)
 end
 
+# """
+#     $(SIGNATURES)
+#
+# Standardize the length colors used by RoMEPlotting.
+# """
+function getColorsByLength(len::Int=7)::Vector{String}
+  len > 99 ? error("Don't have enough colors, 100 is the max.") : nothing
+  COLORS = String["red";"green";"blue";"magenta";"yellow";"deepskyblue"]
+  if len > 6
+    scale = len -7 + 2 # + 2 is artificial and avoids gray100==white
+    scale = 100/scale
+    for i in 7:len
+      push!(COLORS, "gray$(floor(Int,(i-7)*scale))")
+    end
+  end
+  return COLORS[1:len]
+end
+
 # function to draw all pairs of mulitdimensional kernel density estimate
 # axis is matrix with rows as dimensions and two columns for min and max axis cutoffs
 function plotKDE(darr::Array{BallTreeDensity,1};
-      c::NothingUnion{Vector}=nothing,
-      N::Int=200,
-      rmax=-Inf,rmin=Inf,  # should be deprecated
-      axis::NothingUnion{Array{Float64,2}}=nothing,
-      dims::NothingUnion{VectorRange{Int}}=nothing,
-      xlbl::T="X", # to be deprecated
-      title::NothingUnion{T}=nothing,
-      legend::NothingUnion{Vector{T}}=nothing,
-      dimLbls::NothingUnion{Vector{T}}=nothing,
-      levels::NothingUnion{Int}=nothing,
-      fill=false,
-      layers::Bool=false ) where {T <: AbstractString}
-
-
+                 c::NothingUnion{Vector}=getColorsByLength(length(darr)), # nothing
+                 N::Int=200,
+                 rmax=-Inf,rmin=Inf,  # should be deprecated
+                 axis::NothingUnion{Array{Float64,2}}=nothing,
+                 dims::NothingUnion{VectorRange{Int}}=nothing,
+                 xlbl::T="X", # to be deprecated
+                 title::NothingUnion{T}=nothing,
+                 legend::NothingUnion{Vector{T}}=nothing,
+                 dimLbls::NothingUnion{Vector{T}}=nothing,
+                 levels::NothingUnion{Int}=nothing,
+                 fill=false,
+                 layers::Bool=false ) where {T <: AbstractString}
+    #
     # defaults
     defaultcolor = false
     if c==nothing
       c, defaultcolor = ["black"], true
     end
-    c = (length(c)>=2) ? c : repeat(c,length(darr))
+    # c = (length(c)>=2) ? c : repeat(c,length(darr))
     lg = (legend == nothing) ? nothing : Guide.manual_color_key("Legend", legend, c)
 
     H = nothing
