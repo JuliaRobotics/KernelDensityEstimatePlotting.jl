@@ -193,14 +193,18 @@ function plotKDEContour(p::BallTreeDensity;
       fill=fill, layers=layers )
 end
 
-function drawPair(xx::Vector{BallTreeDensity}, dims::Vector{Int};
-    axis::NothingUnion{Array{Float64,2}}=nothing,
-    dimLbls::NothingUnion{Vector{T}}=nothing,
-    legend=nothing,
-    title::NothingUnion{T}=nothing,
-    levels::NothingUnion{Int}=nothing,
-    c::NothingUnion{Vector}=nothing,
-    fill=false, layers::Bool=false ) where {T <: AbstractString}
+function drawPair(xx::Vector{BallTreeDensity},
+                  dims::Vector{Int};
+                  axis::NothingUnion{Array{Float64,2}}=nothing,
+                  dimLbls::NothingUnion{Vector{T}}=nothing,
+                  legend=nothing,
+                  title::NothingUnion{T}=nothing,
+                  levels::NothingUnion{Int}=nothing,
+                  c::NothingUnion{Vector}=nothing,
+                  fill=false,
+                  layers::Bool=false,
+                  overlay=nothing ) where {T <: AbstractString}
+  #
   # pts = getPoints(x);
   xmin, xmax, ymin, ymax = -Inf,Inf,-Inf,Inf
   if axis != nothing
@@ -216,12 +220,19 @@ function drawPair(xx::Vector{BallTreeDensity}, dims::Vector{Int};
   for x in xx
     push!(X, marginal(x,dims))
   end
-  plotKDEContour(X,
+  plr = plotKDEContour(X,
     xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,
     xlbl=xlbl,ylbl=ylbl,
     legend=legend,
     title=title,
-    levels=levels,c=c, fill=fill, layers=layers  )
+    levels=levels,c=c,
+    fill=fill, layers=layers  )
+
+  # add overlay
+  if overlay != nothing
+    union!(plr.layers, overlay.layers)
+  end
+  plr
 end
 
 function stacking(spp::Vector{<:Compose.Context})
@@ -238,7 +249,9 @@ function drawAllPairs(xx::Vector{BallTreeDensity};
       title::NothingUnion{T}=nothing,
       levels::NothingUnion{Int}=nothing,
       c::NothingUnion{Vector}=nothing,
-      fill=false, layers::Bool=false ) where {T <: AbstractString}
+      fill=false,
+      layers::Bool=false,
+      overlay=nothing  ) where {T <: AbstractString}
 
   # pts = getPoints(xx[1]);
   # e = [];
@@ -254,10 +267,11 @@ function drawAllPairs(xx::Vector{BallTreeDensity};
   subplots = Array{Gadfly.Plot,2}(undef, Nrow,Ncol)
   for iT=1:length(PlotI2)
     # only returns layers for first pair
+    ovl = Nout==2 ? overlay : nothing
     if !layers
-      subplots[iT] = drawPair(xx,[PlotI1[iT];PlotI2[iT]], axis=axis, dimLbls=dimLbls, legend=legend, title=title, levels=levels, c=c, fill=fill, layers=layers);
+      subplots[iT] = drawPair(xx,[PlotI1[iT];PlotI2[iT]], axis=axis, dimLbls=dimLbls, legend=legend, title=title, levels=levels, c=c, fill=fill, layers=layers, overlay=ovl );
     else
-      return drawPair(xx,[PlotI1[iT];PlotI2[iT]], axis=axis, dimLbls=dimLbls, legend=legend, title=title, levels=levels, c=c, fill=fill, layers=layers)
+      return drawPair(xx,[PlotI1[iT];PlotI2[iT]], axis=axis, dimLbls=dimLbls, legend=legend, title=title, levels=levels, c=c, fill=fill, layers=layers, overlay=ovl )
     end
   end;
 
@@ -316,7 +330,8 @@ function plotKDE(darr::Array{BallTreeDensity,1};
                  dimLbls::NothingUnion{Vector{T}}=nothing,
                  levels::NothingUnion{Int}=nothing,
                  fill=false,
-                 layers::Bool=false ) where {T <: AbstractString}
+                 layers::Bool=false,
+                 overlay=nothing ) where {T <: AbstractString}
     #
     # defaults
     defaultcolor = false
@@ -351,28 +366,36 @@ function plotKDE(darr::Array{BallTreeDensity,1};
             #
           end
       end
+
     else
       color = defaultcolor ? nothing : c
       H = drawAllPairs(darr, axis=axis, dims=dim, dimLbls=dimLbls, legend=lg, title=title, levels=levels, c=color, fill=fill, layers=layers)
     end
+
+    if overlay != nothing && length(dim) <= 2
+      union!(H.layers, )
+    end
+
     return H
 end
 
 
 function plotKDE(bd::BallTreeDensity;
-      c::NothingUnion{Vector}=nothing,
-      N::Int=200,
-      rmax=-Inf,rmin=Inf,  # should be deprecated
-      axis::NothingUnion{Array{Float64,2}}=nothing,
-      dims::NothingUnion{VectorRange{Int}}=nothing,
-      xlbl::T="X",
-      legend::NothingUnion{Vector{T}}=nothing,
-      title::NothingUnion{T}=nothing,
-      dimLbls::NothingUnion{Vector{T}}=nothing,
-      levels::NothingUnion{Int}=nothing,
-      fill=false, layers::Bool=false ) where {T <: AbstractString}
+                 c::NothingUnion{Vector}=nothing,
+                 N::Int=200,
+                 rmax=-Inf,rmin=Inf,  # should be deprecated
+                 axis::NothingUnion{Array{Float64,2}}=nothing,
+                 dims::NothingUnion{VectorRange{Int}}=nothing,
+                 xlbl::T="X",
+                 legend::NothingUnion{Vector{T}}=nothing,
+                 title::NothingUnion{T}=nothing,
+                 dimLbls::NothingUnion{Vector{T}}=nothing,
+                 levels::NothingUnion{Int}=nothing,
+                 fill=false,
+                 layers::Bool=false,
+                 overlay=nothing  ) where {T <: AbstractString}
 
-  plotKDE([bd],N=N,c=c,rmax=rmax,rmin=rmin,xlbl=xlbl,legend=legend, dims=dims, axis=axis, dimLbls=dimLbls, levels=levels, title=title, fill=fill, layers=layers)
+  plotKDE([bd],N=N,c=c,rmax=rmax,rmin=rmin,xlbl=xlbl,legend=legend, dims=dims, axis=axis, dimLbls=dimLbls, levels=levels, title=title, fill=fill, layers=layers, overlay=overlay )
 end
 
 
