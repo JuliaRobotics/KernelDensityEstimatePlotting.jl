@@ -19,6 +19,9 @@ matrix:
     - os: osx
     - julia: nightly
 
+jobs:
+  fast_finish: true
+
 # script:
 #   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #   - julia --check-bounds=yes -e 'using Pkg; Pkg.clone(pwd()); Pkg.test("KernelDensityEstimatePlotting"; coverage=true)'
