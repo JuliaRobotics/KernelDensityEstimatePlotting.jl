@@ -117,7 +117,8 @@ function plotKDEContour(pp::Vector{BallTreeDensity};
     legend=nothing,
     title::NothingUnion{T}=nothing,
     levels::NothingUnion{Int}=nothing,
-    fill=false, layers::Bool=false ) where {T <: AbstractString}
+    fill=false, layers::Bool=false,
+    line_width=2pt  ) where {T <: AbstractString}
 
   rangeV = getKDERange(pp[1])
   size(rangeV,1) == 2 ? nothing : error("plotKDEContour must receive two dimensional kde, you gave $(Ndim(x))")
@@ -151,7 +152,7 @@ function plotKDEContour(pp::Vector{BallTreeDensity};
     x=range(xmin,stop=xmax,length=N),
     y=range(ymin,stop=ymax,length=N),
     CO,
-    Theme(default_color=parse(Colorant,c[i]),line_width=2.25pt))[1] )
+    Theme(default_color=parse(Colorant,c[i]),line_width=line_width))[1] )
     ## trying to get rug to work
     # rugpl = plot(x=getPoints(p)[1,:], y=getPoints(p)[2,:], Guide.xrug, Guide.yrug)
     # push!( PL, rugpl.layers[1] )
@@ -182,14 +183,15 @@ end
 #        Scale.color_none)
 
 function plotKDEContour(p::BallTreeDensity;
-    xmin=-Inf,xmax=Inf,ymin=-Inf,ymax=Inf,
-    xlbl::T="x", ylbl::T="y",
-    N::Int=200,
-    c::NothingUnion{Vector}=nothing,
-    legend=nothing,
-    title::NothingUnion{T}=nothing,
-    levels::NothingUnion{Int}=nothing,
-    fill=false, layers::Bool=false ) where {T <: AbstractString}
+                        xmin=-Inf,xmax=Inf,ymin=-Inf,ymax=Inf,
+                        xlbl::T="x", ylbl::T="y",
+                        N::Int=200,
+                        c::NothingUnion{Vector}=nothing,
+                        legend=nothing,
+                        title::NothingUnion{T}=nothing,
+                        levels::NothingUnion{Int}=nothing,
+                        fill=false, layers::Bool=false,
+                        line_width=2pt  ) where {T <: AbstractString}
 
     plotKDEContour([p],
       xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,
@@ -199,7 +201,8 @@ function plotKDEContour(p::BallTreeDensity;
       legend=legend,
       title=title,
       levels=levels,
-      fill=fill, layers=layers )
+      fill=fill, layers=layers,
+      line_width=line_width )
 end
 
 function drawPair(xx::Vector{BallTreeDensity},
