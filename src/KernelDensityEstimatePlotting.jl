@@ -312,10 +312,10 @@ end
 
 # """
 #     $(SIGNATURES)
-#
-# Standardize the length colors used by RoMEPlotting.
+
+# Standardize the length colors used by RoMEPlotting, returns `::Vector{String}`.
 # """
-function getColorsByLength(len::Int=7)::Vector{String}
+function getColorsByLength(len::Int=7)
   len > 99 ? error("Don't have enough colors, 100 is the max.") : nothing
   COLORS = String["red";"green";"blue";"magenta";"yellow";"deepskyblue"]
   if len > 6
@@ -331,20 +331,20 @@ end
 # function to draw all pairs of mulitdimensional kernel density estimate
 # axis is matrix with rows as dimensions and two columns for min and max axis cutoffs
 function plotKDE(darr::Array{BallTreeDensity,1};
-                 c::NothingUnion{Vector}=getColorsByLength(length(darr)), # nothing
+                 c::NothingUnion{Vector{<:AbstractString}}=getColorsByLength(length(darr)), # nothing
                  N::Int=200,
                  rmax=-Inf,rmin=Inf,  # should be deprecated
                  axis::NothingUnion{Array{Float64,2}}=nothing,
                  dims::NothingUnion{VectorRange{Int}}=nothing,
-                 xlbl::T="X", # to be deprecated
-                 title::NothingUnion{T}=nothing,
-                 legend::NothingUnion{Vector{T}}=nothing,
-                 dimLbls::NothingUnion{Vector{T}}=nothing,
+                 xlbl::AbstractString="X", # to be deprecated
+                 title::NothingUnion{<:AbstractString}=nothing,
+                 legend::NothingUnion{Vector{<:AbstractString}}=nothing,
+                 dimLbls::NothingUnion{Vector{<:AbstractString}}=nothing,
                  levels::NothingUnion{Int}=nothing,
                  fill=false,
                  points::Bool=true,
                  layers::Bool=false,
-                 overlay=nothing ) where {T <: AbstractString}
+                 overlay=nothing )
     #
     # defaults
     defaultcolor = false
@@ -353,7 +353,16 @@ function plotKDE(darr::Array{BallTreeDensity,1};
       defaultcolor = true
     end
     # c = (length(c)>=2) ? c : repeat(c,length(darr))
-    lg = (legend == nothing) ? nothing : Guide.manual_color_key("Legend", legend, c)
+    lg = if (legend == nothing)
+      nothing
+    else
+      thecolors = Vector{Colorant}()
+      for eachcol in parse.(Colorant, c)
+        push!(thecolors, eachcol)
+      end
+      @show thecolors
+      Guide.manual_color_key("Legend", legend, thecolors)
+    end
 
     H = nothing
     i = 0
