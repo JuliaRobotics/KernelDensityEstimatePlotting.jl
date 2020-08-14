@@ -14,10 +14,10 @@ jobs:
     - name: "Legacy, Julia 1.0"
       julia: 1.0
     - name: "MASTER AND TAGS"
-    - name: "OSX"
-      os: osx
     - name: "Julia nightly"
       julia: nightly
+    - name: "OSX"
+      os: osx
     - name: "ARM64"
       arch: arm64
       # if: NOT branch =~ ^release.*$
