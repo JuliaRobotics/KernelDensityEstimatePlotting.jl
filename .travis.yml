@@ -3,29 +3,29 @@ language: julia
 arch:
   - amd64
 
--os:
+os:
   - linux
+
+julia:
+  - 1.5
 
 jobs:
   include:
     - name: "Legacy, Julia 1.0"
       julia: 1.0
     - name: "MASTER AND TAGS"
-      julia: 1.5
-    - name: "OSX, Julia 1.5"
-      julia: 1.5
+    - name: "OSX"
       os: osx
     - name: "Julia nightly"
       julia: nightly
-    # - name: "ARM64, Julia 1.4"
-    #   if: NOT branch =~ ^release.*$
-    #   arch: arm64
-    #   julia: 1.4
+    - name: "ARM64"
+      arch: arm64
+      # if: NOT branch =~ ^release.*$
   fast_finish: true
   allow_failures:
     - julia: nightly
     - os: osx
-    # - arch: arm64
+    - arch: arm64
 
 notifications:
   email: false
