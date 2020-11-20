@@ -70,10 +70,11 @@ function draw1D!(bd::BallTreeDensity,
   #
   global DOYTICKS
 
+  # TODO add logprob eval option
   yV = evaluateDualTree(bd,bins)
   # clamp max y values
   yV[3.0 .< yV] .= 3.0
-  if e == nothing
+  if e === nothing
     ptArr = Any[]
 
     if points
@@ -91,10 +92,10 @@ function draw1D!(bd::BallTreeDensity,
       push!(ptArr,Guide.yticks(ticks=nothing))
       # e=Gadfly.plot(x=bins,y=yV,Geom.line, Gadfly.Theme(default_color=parse(Colorant,c)),Guide.xlabel(xlbl),Guide.ylabel(""),Guide.yticks(ticks=nothing))
     end
-    if legend != nothing
+    if legend !== nothing
       push!(ptArr, legend)
     end
-    if title != nothing
+    if title !== nothing
       push!(ptArr, Guide.title(title))
     end
 
@@ -379,12 +380,14 @@ function plotKDE(darr::Array{BallTreeDensity,1};
           if (length(dim) == 1) # Ndim(bd)
             if rangeV[1] > rmin  rangeV[1] = rmin end
             if rmax > rangeV[2]  rangeV[2] = rmax end
-            if axis!=nothing
+            if axis !== nothing
               di = dim[1]
               if rangeV[1] > axis[di,1]  rangeV[1] = axis[di,1] end
               if axis[di,2] > rangeV[2]  rangeV[2] = axis[di,2] end
             end
-            H=draw1D!(mbd,range(rangeV[1],stop=rangeV[2],length=N), H, c[i],xlbl=xlbl,legend=lg, title=title,            points=points, fill=fill) #,argsPlot,argsKDE
+            H=draw1D!(mbd,range(rangeV[1],stop=rangeV[2],length=N), H, 
+                      c[i],xlbl=xlbl,legend=lg, title=title,            
+                      points=points, fill=fill) #,argsPlot,argsKDE
           else
             #
           end
