@@ -64,6 +64,7 @@ function draw1D!(bd::BallTreeDensity,
                  myStyle::T="";
                  xlbl="X",
                  points::Bool=true,
+                 selectedPoints=nothing,
                  legend=nothing,
                  title::NothingUnion{T}=nothing,
                  fill=false, layers::Bool=false ) where {T <: AbstractString}
@@ -110,7 +111,7 @@ function draw1D!(bd::BallTreeDensity,
 end
 
 
-function plotKDEContour(pp::Vector{BallTreeDensity};
+function plotKDEContour(pp::AbstractVector{<:BallTreeDensity};
     xmin=-Inf,xmax=Inf,ymin=-Inf,ymax=Inf,
     xlbl::T="x", ylbl::T="y",
     N::Int=200,
@@ -118,9 +119,10 @@ function plotKDEContour(pp::Vector{BallTreeDensity};
     legend=nothing,
     title::NothingUnion{T}=nothing,
     levels::NothingUnion{Int}=nothing,
+    selectedPoints=nothing,
     fill=false, layers::Bool=false,
     line_width=2pt  ) where {T <: AbstractString}
-
+  #
   rangeV = getKDERange(pp[1])
   size(rangeV,1) == 2 ? nothing : error("plotKDEContour must receive two dimensional kde, you gave $(Ndim(x))")
   xmin = xmin != -Inf ? xmin : rangeV[1,1]
@@ -138,25 +140,42 @@ function plotKDEContour(pp::Vector{BallTreeDensity};
   PL = []
 
   # default options
-  CO = levels == nothing ? Geom.contour : Geom.contour(levels=levels)
-  if c == nothing
+  CO = levels === nothing ? Geom.contour : Geom.contour(levels=levels)
+  if c === nothing
     c = ["deepskyblue" for i in 1:length(pp)]
   else
     push!(PL, Gadfly.Scale.color_none)
   end
   # Gadfly.plot(
 
-  i = 0
-  for p in pp
-    i+=1
+  for (i,p) in enumerate(pp)
     push!(PL, layer(z=(x,y)->evaluateDualTree(p,([[x]';[y]']))[1],
-    x=range(xmin,stop=xmax,length=N),
-    y=range(ymin,stop=ymax,length=N),
-    CO,
-    Theme(default_color=parse(Colorant,c[i]),line_width=line_width))[1] )
+                    x=range(xmin,stop=xmax,length=N),
+                    y=range(ymin,stop=ymax,length=N),
+                    CO,
+                    Theme(default_color=parse(Colorant,c[i]),line_width=line_width)
+                    )[1] 
+          )
     ## trying to get rug to work
     # rugpl = plot(x=getPoints(p)[1,:], y=getPoints(p)[2,:], Guide.xrug, Guide.yrug)
     # push!( PL, rugpl.layers[1] )
+    ## plot selectedPoints for this belief_i
+    if !(selectedPoints isa Nothing)
+      len = length(selectedPoints[1])
+      p_pts = getPoints(p)
+      sp_ = if i <= len
+        (x->x[i]).(selectedPoints)
+      else
+        @info "Assuming density=$i, so taking 1:length(selectedPoints)=$(length(selectedPoints))"
+        1:length(selectedPoints)
+      end
+      push!(PL, layer(x=p_pts[1,sp_],
+                      y=p_pts[2,sp_],
+                      Geom.point,
+                      Theme(default_color=parse(Colorant,c[i])))[1]
+            )
+      #
+    end
   end
 
   push!(PL,Coord.Cartesian(xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax))
@@ -165,11 +184,11 @@ function plotKDEContour(pp::Vector{BallTreeDensity};
   # Might be a per layer theme
   !fill ? nothing : push!(PL, Theme(background_color=colorant"white"))
 
-  if legend != nothing
+  if legend !== nothing
     push!(PL, legend)
   end
 
-  if title != nothing
+  if title !== nothing
     push!(PL, Guide.title(title))
   end
   if !layers
@@ -191,6 +210,7 @@ function plotKDEContour(p::BallTreeDensity;
                         legend=nothing,
                         title::NothingUnion{T}=nothing,
                         levels::NothingUnion{Int}=nothing,
+                        selectedPoints=nothing,
                         fill=false, layers::Bool=false,
                         line_width=2pt  ) where {T <: AbstractString}
 
@@ -203,10 +223,11 @@ function plotKDEContour(p::BallTreeDensity;
       title=title,
       levels=levels,
       fill=fill, layers=layers,
+      selectedPoints=selectedPoints,
       line_width=line_width )
 end
 
-function drawPair(xx::Vector{BallTreeDensity},
+function drawPair(xx::AbstractVector{<:BallTreeDensity},
                   dims::Vector{Int};
                   axis::NothingUnion{Array{Float64,2}}=nothing,
                   dimLbls::NothingUnion{Vector{T}}=nothing,
@@ -215,6 +236,7 @@ function drawPair(xx::Vector{BallTreeDensity},
                   levels::NothingUnion{Int}=nothing,
                   c::NothingUnion{Vector}=nothing,
                   fill=false,
+                  selectedPoints=nothing,
                   layers::Bool=false,
                   overlay=nothing ) where {T <: AbstractString}
   #
@@ -239,10 +261,12 @@ function drawPair(xx::Vector{BallTreeDensity},
     legend=legend,
     title=title,
     levels=levels,c=c,
-    fill=fill, layers=layers  )
+    fill=fill, layers=layers,
+    selectedPoints=selectedPoints  )
+  #
 
   # add overlay
-  if overlay != nothing
+  if overlay !== nothing
     union!(plr.layers, overlay.layers)
   end
   plr
@@ -254,7 +278,7 @@ end
 
 # function to draw all pairs of mulitdimensional kernel density estimate
 # axis is matrix with rows as dimensions and two columns for min and max axis cutoffs
-function drawAllPairs(xx::Vector{BallTreeDensity};
+function drawAllPairs(xx::AbstractVector{<:BallTreeDensity};
       dims::NothingUnion{VectorRange{Int}}=nothing,
       axis::NothingUnion{Array{Float64,2}}=nothing,
       dimLbls::NothingUnion{Vector{T}}=nothing,
@@ -264,11 +288,12 @@ function drawAllPairs(xx::Vector{BallTreeDensity};
       c::NothingUnion{Vector}=nothing,
       fill=false,
       layers::Bool=false,
+      selectedPoints=nothing,
       overlay=nothing  ) where {T <: AbstractString}
 
   # pts = getPoints(xx[1]);
   # e = [];
-  dims = dims != nothing ? collect(dims) : collect(1:Ndim(xx[1]))
+  dims = dims !== nothing ? collect(dims) : collect(1:Ndim(xx[1]))
   Nout = length(dims);
   PlotI2 = triu(repeat( (dims)' ,Nout, 1), 1);
   PlotI1 = triu(repeat((dims)' , Nout, 1)', 1);
@@ -282,9 +307,9 @@ function drawAllPairs(xx::Vector{BallTreeDensity};
     # only returns layers for first pair
     ovl = Nout==2 ? overlay : nothing
     if !layers
-      subplots[iT] = drawPair(xx,[PlotI1[iT];PlotI2[iT]], axis=axis, dimLbls=dimLbls, legend=legend, title=title, levels=levels, c=c, fill=fill, layers=layers, overlay=ovl );
+      subplots[iT] = drawPair(xx,[PlotI1[iT];PlotI2[iT]], axis=axis, dimLbls=dimLbls, legend=legend, title=title, levels=levels, c=c, fill=fill, layers=layers, overlay=ovl, selectedPoints=selectedPoints );
     else
-      return drawPair(xx,[PlotI1[iT];PlotI2[iT]], axis=axis, dimLbls=dimLbls, legend=legend, title=title, levels=levels, c=c, fill=fill, layers=layers, overlay=ovl )
+      return drawPair(xx,[PlotI1[iT];PlotI2[iT]], axis=axis, dimLbls=dimLbls, legend=legend, title=title, levels=levels, c=c, fill=fill, layers=layers, overlay=ovl, selectedPoints=selectedPoints )
     end
   end;
 
@@ -344,17 +369,18 @@ function plotKDE(darr::Array{BallTreeDensity,1};
                  levels::NothingUnion{Int}=nothing,
                  fill=false,
                  points::Bool=true,
+                 selectedPoints=nothing,
                  layers::Bool=false,
                  overlay=nothing )
     #
     # defaults
     defaultcolor = false
-    if c==nothing || length(c) != length(darr)
+    if c===nothing || length(c) != length(darr)
       c = getColorsByLength(length(darr))
       defaultcolor = true
     end
     # c = (length(c)>=2) ? c : repeat(c,length(darr))
-    lg = if (legend == nothing)
+    lg = if (legend === nothing)
       nothing
     else
       thecolors = Vector{Colorant}()
@@ -369,8 +395,8 @@ function plotKDE(darr::Array{BallTreeDensity,1};
     i = 0
 
     Ndims = Ndim(darr[1])
-    dim = dims!=nothing ? dims : 1:Ndims #.bt.dims
-    dimLbls = dimLbls!=nothing ? dimLbls : String["$(i)" for i in 1:Ndims]
+    dim = dims!==nothing ? dims : 1:Ndims #.bt.dims
+    dimLbls = dimLbls!==nothing ? dimLbls : String["$(i)" for i in 1:Ndims]
     dim = collect(dim)
     if length(dim) == 1
       for bd in darr
@@ -387,7 +413,7 @@ function plotKDE(darr::Array{BallTreeDensity,1};
             end
             H=draw1D!(mbd,range(rangeV[1],stop=rangeV[2],length=N), H, 
                       c[i],xlbl=xlbl,legend=lg, title=title,            
-                      points=points, fill=fill) #,argsPlot,argsKDE
+                      points=points, fill=fill, selectedPoints=selectedPoints ) #,argsPlot,argsKDE
           else
             #
           end
@@ -395,10 +421,10 @@ function plotKDE(darr::Array{BallTreeDensity,1};
 
     else
       color = defaultcolor ? nothing : c
-      H = drawAllPairs(darr, axis=axis, dims=dim, dimLbls=dimLbls, legend=lg, title=title, levels=levels, c=color, fill=fill, layers=layers)
+      H = drawAllPairs(darr, axis=axis, dims=dim, dimLbls=dimLbls, legend=lg, title=title, levels=levels, c=color, fill=fill, layers=layers, selectedPoints=selectedPoints )
     end
 
-    if overlay != nothing && length(dim) <= 2
+    if overlay !== nothing && length(dim) <= 2
       union!(H.layers, )
     end
 
