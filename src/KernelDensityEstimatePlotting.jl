@@ -298,7 +298,7 @@ function drawAllPairs(xx::Vector{BallTreeDensity};
         try
           push!(sp,hstack(subplots[i,j])) # very hacky line, but Compose.Context and Gadfly.Plot not playing nice together in hstack
         catch e
-          print("KDEPlotting01.jl/drawAllPairs -- supressing all exceptions for stacking empty contour plots")
+          print("KDEPlotting01.jl/drawAllPairs -- suppressing all exceptions for stacking empty contour plots")
           println(e)
           push!(sp,Gadfly.context())
         end
