@@ -352,7 +352,7 @@ getColorsByLength(len::Int=10) = Colors.distinguishable_colors(len, [RGB(1,1,1),
 # function to draw all pairs of mulitdimensional kernel density estimate
 # axis is matrix with rows as dimensions and two columns for min and max axis cutoffs
 function plotKDE(darr::Array{BallTreeDensity,1};
-                  c::NothingUnion{Vector{<:AbstractString}}=getColorsByLength(length(darr)), # nothing
+                  c::NothingUnion{<:AbstractVector}=getColorsByLength(length(darr)), # nothing
                   N::Int=200,
                   rmax=-Inf,rmin=Inf,  # should be deprecated
                   axis::NothingUnion{Array{Float64,2}}=nothing,
