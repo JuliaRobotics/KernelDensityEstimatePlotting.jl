@@ -2,7 +2,9 @@ module KernelDensityEstimatePlotting
 
 using LinearAlgebra, Statistics
 using KernelDensityEstimate
-using Gadfly, Colors, Cairo, Fontconfig, Compose
+using Gadfly, Colors, Compose
+# , Cairo, Fontconfig
+using DocStringExtensions
 
 import Gadfly: plot
 # KDE imports will be remove when plotting is permanently removed from the KDE package
@@ -60,14 +62,14 @@ end
 function draw1D!(bd::BallTreeDensity,
                  bins::AbstractArray{Float64,1},
                  e,
-                 c::T="deepskyblue",
-                 myStyle::T="";
+                 c=colorant"deepskyblue",
+                 myStyle::AbstractString="";
                  xlbl="X",
                  points::Bool=true,
                  selectedPoints=nothing,
                  legend=nothing,
-                 title::NothingUnion{T}=nothing,
-                 fill=false, layers::Bool=false ) where {T <: AbstractString}
+                 title::NothingUnion{<:AbstractString}=nothing,
+                 fill=false, layers::Bool=false )
   #
   global DOYTICKS
 
@@ -336,42 +338,35 @@ function drawAllPairs(xx::AbstractVector{<:BallTreeDensity};
   return Nrow==1 && Ncol==1 ? subplots[1,1] : vstack(hh...)
 end
 
-# """
-#     $(SIGNATURES)
+"""
+    $(SIGNATURES)
 
-# Standardize the length colors used by RoMEPlotting, returns `::Vector{String}`.
-# """
-function getColorsByLength(len::Int=7)
-  len > 99 ? error("Don't have enough colors, 100 is the max.") : nothing
-  COLORS = String["red";"green";"blue";"magenta";"yellow";"deepskyblue"]
-  if len > 6
-    scale = len -7 + 2 # + 2 is artificial and avoids gray100==white
-    scale = 100/scale
-    for i in 7:len
-      push!(COLORS, "gray$(floor(Int,(i-7)*scale))")
-    end
-  end
-  return COLORS[1:len]
-end
+Standardize the length colors used by RoMEPlotting, returns `::Vector{String}`.
+
+Notes:
+- TODO, use `Colors.distinguishable_colors(10, [RGB(1,1,1), RGB(0,0,0)], dropseed=true)`
+"""
+getColorsByLength(len::Int=10) = Colors.distinguishable_colors(len, [RGB(1,1,1), RGB(0,0,0)], dropseed=true)
+
 
 # function to draw all pairs of mulitdimensional kernel density estimate
 # axis is matrix with rows as dimensions and two columns for min and max axis cutoffs
 function plotKDE(darr::Array{BallTreeDensity,1};
-                 c::NothingUnion{Vector{<:AbstractString}}=getColorsByLength(length(darr)), # nothing
-                 N::Int=200,
-                 rmax=-Inf,rmin=Inf,  # should be deprecated
-                 axis::NothingUnion{Array{Float64,2}}=nothing,
-                 dims::NothingUnion{VectorRange{Int}}=nothing,
-                 xlbl::AbstractString="X", # to be deprecated
-                 title::NothingUnion{<:AbstractString}=nothing,
-                 legend::NothingUnion{Vector{<:AbstractString}}=nothing,
-                 dimLbls::NothingUnion{Vector{<:AbstractString}}=nothing,
-                 levels::NothingUnion{Int}=nothing,
-                 fill=false,
-                 points::Bool=true,
-                 selectedPoints=nothing,
-                 layers::Bool=false,
-                 overlay=nothing )
+                  c::NothingUnion{Vector{<:AbstractString}}=getColorsByLength(length(darr)), # nothing
+                  N::Int=200,
+                  rmax=-Inf,rmin=Inf,  # should be deprecated
+                  axis::NothingUnion{Array{Float64,2}}=nothing,
+                  dims::NothingUnion{VectorRange{Int}}=nothing,
+                  xlbl::AbstractString="X", # to be deprecated
+                  title::NothingUnion{<:AbstractString}=nothing,
+                  legend::NothingUnion{Vector{<:AbstractString}}=nothing,
+                  dimLbls::NothingUnion{Vector{<:AbstractString}}=nothing,
+                  levels::NothingUnion{Int}=nothing,
+                  fill=false,
+                  points::Bool=true,
+                  selectedPoints=nothing,
+                  layers::Bool=false,
+                  overlay=nothing )
     #
     # defaults
     defaultcolor = false
@@ -411,8 +406,9 @@ function plotKDE(darr::Array{BallTreeDensity,1};
               if rangeV[1] > axis[di,1]  rangeV[1] = axis[di,1] end
               if axis[di,2] > rangeV[2]  rangeV[2] = axis[di,2] end
             end
-            H=draw1D!(mbd,range(rangeV[1],stop=rangeV[2],length=N), H, 
-                      c[i],xlbl=xlbl,legend=lg, title=title,            
+            H=draw1D!(mbd, range(rangeV[1],stop=rangeV[2],length=N), 
+                      H, c[i];
+                      xlbl=xlbl,legend=lg, title=title,            
                       points=points, fill=fill, selectedPoints=selectedPoints ) #,argsPlot,argsKDE
           else
             #
