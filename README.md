@@ -1,7 +1,6 @@
 # KernelDensityEstimatePlotting.jl
 
-[![Build Status](https://travis-ci.org/JuliaRobotics/KernelDensityEstimatePlotting.jl.svg?branch=master)](https://travis-ci.org/JuliaRobotics/KernelDensityEstimatePlotting.jl)
-[![codecov.io](https://codecov.io/github/JuliaRobotics/KernelDensityEstimatePlotting.jl/coverage.svg?branch=master)](https://codecov.io/github/JuliaRobotics/KernelDensityEstimatePlotting.jl?branch=master)
+[![build-dev]][CI-url]  [![codecov-img]][codecov-url]
 
 This package provides the plotting functionality for the [KernelDensityEstimate.jl](https://github.com/JuliaRobotics/KernelDensityEstimate.jl) package, and currently only supports the Gadfly back-end.
 
@@ -31,3 +30,11 @@ plot(p)
 ## More Examples
 
 Please see examples on [KernelDensityEstimate.jl](https://github.com/JuliaRobotics/KernelDensityEstimate.jl).
+
+
+
+[CI-url]: https://github.com/JuliaRobotics/KernelDensityEstimatePlotting.jl/actions/workflows/ci.yml
+[build-dev]: https://github.com/JuliaRobotics/KernelDensityEstimatePlotting.jl/actions/workflows/ci.yml/badge.svg?branch=master
+
+[codecov-url]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimatePlotting.jl?branch=master
+[codecov-img]: https://codecov.io/github/JuliaRobotics/KernelDensityEstimatePlotting.jl/coverage.svg?branch=master
